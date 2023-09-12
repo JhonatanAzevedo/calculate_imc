@@ -15,8 +15,9 @@ class _CalculateImcPageState extends State<CalculateImcPage> {
   final TextEditingController weightController = TextEditingController(text: "");
   final FocusNode heightFocusNode = FocusNode();
   final FocusNode weightFocusNode = FocusNode();
-  final ImcRepository imcRepository = ImcRepository();
-  List<Imc> imc = [];
+  ImcRepository imcRepository = ImcRepository();
+
+  List<ImcModel> imcList = [];
 
   @override
   void initState() {
@@ -25,7 +26,7 @@ class _CalculateImcPageState extends State<CalculateImcPage> {
   }
 
   void getImcs() async {
-    imc = await imcRepository.getImc();
+    imcList = await imcRepository.getImc();
     setState(() {});
   }
 
@@ -150,18 +151,18 @@ class _CalculateImcPageState extends State<CalculateImcPage> {
                 const SizedBox(height: 30),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: imc.length,
+                    itemCount: imcList.length,
                     itemBuilder: (context, index) {
-                      var imcValue = imc[index];
+                      var imcValue = imcList[index];
                       return Dismissible(
                         onDismissed: (DismissDirection dismissDirection) async {
-                          await imcRepository.removeImc(imcValue.id);
+                          await imcRepository.removeImc(imcValue.id.toString());
                         },
-                        key: Key(imcValue.id),
+                        key: Key(imcValue.id.toString()),
                         child: Column(
                           children: [
                             ListTile(
-                              title: Text(imcValue.descricao),
+                              title: Text(imcValue.description),
                               subtitle: Text('IMC: ${imcValue.imc}'),
                               titleTextStyle: const TextStyle(fontSize: 26, color: Colors.black),
                               subtitleTextStyle: const TextStyle(fontSize: 26, color: Colors.black),
@@ -187,7 +188,7 @@ class _CalculateImcPageState extends State<CalculateImcPage> {
   Future<void> calculateImc({required String weight, required String height}) async {
     double weightValue;
     double heightValue;
-    String descricao = '';
+    String description = '';
 
     weightValue = double.tryParse(weight) ?? 0;
 
@@ -203,23 +204,25 @@ class _CalculateImcPageState extends State<CalculateImcPage> {
     double imc = double.parse((weightValue / (heightValue * heightValue)).toStringAsFixed(1));
 
     if (imc < 16) {
-      descricao = 'Magreza grave';
+      description = 'Magreza grave';
     } else if (imc < 17) {
-      descricao = 'Magreza moderada';
+      description = 'Magreza moderada';
     } else if (imc < 18.5) {
-      descricao = 'Magreza leve';
+      description = 'Magreza leve';
     } else if (imc < 25) {
-      descricao = 'Saudavel';
+      description = 'Saudavel';
     } else if (imc < 30) {
-      descricao = 'Sobrepeso';
+      description = 'Sobrepeso';
     } else if (imc < 35) {
-      descricao = 'Obesidade Grau I';
+      description = 'Obesidade Grau I';
     } else if (imc < 40) {
-      descricao = 'Obesidade Grau II (severa)';
+      description = 'Obesidade Grau II (severa)';
     } else if (imc >= 40) {
-      descricao = 'Obesidade Grau III (morbida)';
+      description = 'Obesidade Grau III (morbida)';
     }
-    await imcRepository.addImc(Imc(descricao, imc.toString()));
+
+    await imcRepository.addImc(ImcModel(id: 0, description: description, imc: imc.toString()));
+    getImcs();
     setState(() {});
   }
 }

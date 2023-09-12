@@ -1,23 +1,27 @@
-
-
 import '../model/imc.dart';
+import '../services/sql_data_base.dart';
 
 class ImcRepository {
-  final List<Imc> _imc = [];
+  Future<List<ImcModel>> getImc() async {
+    List<ImcModel> imcList = [];
+    var db = await SQLiteDataBase().getDataBase();
+    var result = await db.rawQuery('SELECT id, description, imc FROM imcList');
+    for (var element in result) {
+      imcList.add(ImcModel(id: int.parse( element["id"].toString()), description: element["description"].toString(), imc: element["imc"].toString()));
+    }
+    return imcList;
+  }
 
-  Future<void> addImc(Imc tarefa) async {
-    await Future.delayed(const Duration(milliseconds: 100));
-    _imc.add(tarefa);
+  Future<void> addImc(ImcModel imcModel) async {
+    var db = await SQLiteDataBase().getDataBase();
+    await db.rawInsert(
+      'INSERT INTO imcList (description, imc) values(?,?)',
+      [imcModel.description, imcModel.imc],
+    );
   }
 
   Future<void> removeImc(String id) async {
-    await Future.delayed(const Duration(milliseconds: 100));
-    _imc.remove(_imc.where((tarefa) => tarefa.id == id).first);
+    var db = await SQLiteDataBase().getDataBase();
+    await db.rawInsert('DELETE FROM imcList WHERE id = ?', [id]);
   }
-
-  Future<List<Imc>> getImc() async {
-    await Future.delayed(const Duration(milliseconds: 100));
-    return _imc;
-  }
-
 }

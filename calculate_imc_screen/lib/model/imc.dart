@@ -1,11 +1,7 @@
-import 'package:flutter/cupertino.dart';
-
-class Imc {
-  final String _id = UniqueKey().toString();
-  final String descricao;
+class ImcModel {
+  final int id;
+  final String description;
   final String imc;
 
-  Imc(this.descricao, this.imc);
-
-  String get id => _id;
+  ImcModel({required this.description, required this.imc, required this.id});
 }
